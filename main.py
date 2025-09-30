@@ -5,8 +5,9 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 from aiogram.filters import Command
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-bot = Bot(token=BOT_TOKEN)
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise RuntimeError("BOT_TOKEN не задан")
 dp = Dispatcher()
 
 async def download_tiktok(url: str) -> str | None:
@@ -42,3 +43,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
