@@ -8,6 +8,9 @@ from aiogram.filters import Command
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN не задан")
+
+# создаём бота и диспетчер
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 async def download_tiktok(url: str) -> str | None:
@@ -31,16 +34,15 @@ async def start_handler(message: Message):
 @dp.message(F.text.contains("tiktok.com"))
 async def tiktok_handler(message: Message):
     url = message.text.strip()
-    await message.answer("чекай, ща скачаю...")
+    await message.answer("почекай, ща скачаю...")
     video_url = await download_tiktok(url)
     if not video_url:
-        await message.answer("не получилось. перепроверь ссылку.")
+        await message.answer("не получилось. Перепроверь ссылку.")
         return
-    await message.answer_video(video_url, caption="тримай твое видео")
+    await message.answer_video(video_url, caption="тримай своё видео")
 
 async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
-
