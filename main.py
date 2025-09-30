@@ -4,15 +4,21 @@ import aiohttp
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 from aiogram.filters import Command
+from dotenv import load_dotenv
+from pytube import YouTube
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+# Загружаем .env
+load_dotenv()
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN не задан")
 
-# создаём бота и диспетчер
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+
+# ----------- TikTok -------------
 async def download_tiktok(url: str) -> str | None:
     api_url = "https://www.tikwm.com/api/"
     async with aiohttp.ClientSession() as session:
@@ -27,20 +33,51 @@ async def download_tiktok(url: str) -> str | None:
                         return play_url
     return None
 
+
+# ----------- YouTube Shorts -------------
+async def download_shorts(url: str) -> str | None:
+    try:
+        yt = YouTube(url)
+        stream = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+        if stream:
+            file_path = f"temp_{yt.video_id}.mp4"
+            stream.download(filename=file_path)
+            return file_path
+    except Exception as e:
+        print("Ошибка YouTube:", e)
+        return None
+
+
+# ----------- Хэндлеры -------------
 @dp.message(Command("start"))
 async def start_handler(message: Message):
-    await message.answer("привет! пришли мне ссылку на тикток, и я скачаю видео.")
+    await message.answer("Привет! Пришли мне ссылку на TikTok или YouTube Shorts, и я скачаю видео.")
+
 
 @dp.message(F.text.contains("tiktok.com"))
 async def tiktok_handler(message: Message):
     url = message.text.strip()
-    await message.answer("почекай, ща скачаю...")
+    await message.answer("Почекай, ща скачаю TikTok...")
     video_url = await download_tiktok(url)
     if not video_url:
-        await message.answer("не получилось. Перепроверь ссылку.")
+        await message.answer("Не получилось скачать TikTok. Перепроверь ссылку.")
         return
-    await message.answer_video(video_url, caption="тримай своё видео")
+    await message.answer_video(video_url, caption="Тримай своё видео!")
 
+
+@dp.message(F.text.contains("youtube.com") | F.text.contains("youtu.be"))
+async def youtube_handler(message: Message):
+    url = message.text.strip()
+    await message.answer("Почекай, ща скачаю YouTube Shorts...")
+    file_path = await download_shorts(url)
+    if not file_path:
+        await message.answer("Не получилось скачать видео. Проверь ссылку.")
+        return
+    await message.answer_video(open(file_path, "rb"), caption="Тримай своё видео!")
+    os.remove(file_path)  # удаляем файл после отправки
+
+
+# ----------- Запуск -------------
 async def main():
     await dp.start_polling(bot)
 
