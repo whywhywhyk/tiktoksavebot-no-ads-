@@ -43,27 +43,27 @@ async def download_shorts(url: str) -> str | None:
 # ----------- Хэндлеры -------------
 @dp.message(Command("start"))
 async def start_handler(message: Message):
-    await message.answer("Привет! Пришли мне ссылку на TikTok или YouTube Shorts, и я скачаю видео.")
+    await message.answer("привет! пришли мне ссылку на тикток или легендарный ютуб шортс, и я скачаю видео.")
 
 @dp.message(F.text.contains("tiktok.com"))
 async def tiktok_handler(message: Message):
     url = message.text.strip()
-    await message.answer("Почекай, ща скачаю TikTok...")
+    await message.answer("почекай, ща скачаю видос...")
     video_url = await download_tiktok(url)
     if not video_url:
-        await message.answer("Не получилось скачать TikTok. Перепроверь ссылку.")
+        await message.answer("не получилось скачать тикток. перепроверь ссылку.")
         return
-    await message.answer_video(video_url, caption="Тримай своё видео!")
+    await message.answer_video(video_url, caption="тримай своё видео!")
 
 @dp.message(F.text.contains("youtube.com") | F.text.contains("youtu.be"))
 async def youtube_handler(message: Message):
     url = message.text.strip()
-    await message.answer("Почекай, ща скачаю YouTube Shorts...")
+    await message.answer("почекай, ща скачаю ютуб шортс...")
     file_path = await download_shorts(url)
     if not file_path:
-        await message.answer("Не получилось скачать видео. Проверь ссылку.")
+        await message.answer("не получилось скачать видео. проверь ссылку.")
         return
-    await message.answer_video(open(file_path, "rb"), caption="Тримай своё видео!")
+    await message.answer_video(open(file_path, "rb"), caption="тримай своё видео!")
     os.remove(file_path)
 
 # ----------- Запуск -------------
@@ -72,3 +72,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
