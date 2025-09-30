@@ -4,19 +4,13 @@ import aiohttp
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 from aiogram.filters import Command
-from dotenv import load_dotenv
 from pytube import YouTube
 
-# Загружаем .env
-load_dotenv()
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN не задан")
+# Жёстко прописанный токен
+BOT_TOKEN = "8062837606:AAGBZEsGRChFfZ6GKOOwuoYoYv0Dc_NQW-M"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
-
 
 # ----------- TikTok -------------
 async def download_tiktok(url: str) -> str | None:
@@ -33,7 +27,6 @@ async def download_tiktok(url: str) -> str | None:
                         return play_url
     return None
 
-
 # ----------- YouTube Shorts -------------
 async def download_shorts(url: str) -> str | None:
     try:
@@ -47,12 +40,10 @@ async def download_shorts(url: str) -> str | None:
         print("Ошибка YouTube:", e)
         return None
 
-
 # ----------- Хэндлеры -------------
 @dp.message(Command("start"))
 async def start_handler(message: Message):
     await message.answer("Привет! Пришли мне ссылку на TikTok или YouTube Shorts, и я скачаю видео.")
-
 
 @dp.message(F.text.contains("tiktok.com"))
 async def tiktok_handler(message: Message):
@@ -64,7 +55,6 @@ async def tiktok_handler(message: Message):
         return
     await message.answer_video(video_url, caption="Тримай своё видео!")
 
-
 @dp.message(F.text.contains("youtube.com") | F.text.contains("youtu.be"))
 async def youtube_handler(message: Message):
     url = message.text.strip()
@@ -74,8 +64,7 @@ async def youtube_handler(message: Message):
         await message.answer("Не получилось скачать видео. Проверь ссылку.")
         return
     await message.answer_video(open(file_path, "rb"), caption="Тримай своё видео!")
-    os.remove(file_path)  # удаляем файл после отправки
-
+    os.remove(file_path)
 
 # ----------- Запуск -------------
 async def main():
